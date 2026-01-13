@@ -7,9 +7,7 @@ import http from "http";
 import connectDB from "./config/db.js";
 import { initSocket } from "./config/socket.js";
 
-import authRoutes from "./routes/auth.routes.js";
-import gigRoutes from "./routes/gig.routes.js";
-import bidRoutes from "./routes/bid.routes.js";
+import apiRoutes from "./routes/index.js";
 import { protect } from "./middlewares/auth.middleware.js";
 
 import { notFound, errorHandler } from "./middlewares/error.middleware.js";
@@ -29,10 +27,8 @@ app.use(
   })
 );
 
-// 3️Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/gigs", gigRoutes);
-app.use("/api/bids", bidRoutes);
+//Routes
+app.use("/api", apiRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
