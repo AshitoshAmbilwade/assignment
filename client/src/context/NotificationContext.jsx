@@ -22,7 +22,7 @@ export const NotificationProvider = ({ children }) => {
   }
 
   const socket = io("https://backendgigflow.onrender.com", {
-    transports: ["websocket"],
+    transports: ["websocket", "polling"],
     withCredentials: true,
   });
 

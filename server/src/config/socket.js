@@ -5,7 +5,7 @@ let io;
 export const initSocket = (httpServer) => {
   io = new Server(httpServer, {
     cors: {
-      origin: "*",
+      origin: "https://gigflow-beige.vercel.app",
       credentials: true,
     },
   });
