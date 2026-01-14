@@ -33,12 +33,14 @@ export const loginUser = createAsyncThunk(
   }
 );
 export const checkAuth = createAsyncThunk(
-  "auth/check",
+  "auth/checkAuth",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await authApi.getMe();
+      const res = await axios.get("/api/auth/me", {
+        withCredentials: true,
+      });
       return res.data.user;
-    } catch {
+    } catch (err) {
       return rejectWithValue(null);
     }
   }
