@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
 import { authApi } from "../api/index";
 
 /**
@@ -32,32 +33,36 @@ export const loginUser = createAsyncThunk(
     }
   }
 );
+
+// ✅ Check auth on refresh
 export const checkAuth = createAsyncThunk(
   "auth/checkAuth",
   async (_, { rejectWithValue }) => {
     try {
       const res = await axios.get(
-  `${import.meta.env.VITE_API_URL}/api/auth/me`,
-  { withCredentials: true }
-);
+        `${import.meta.env.VITE_API_URL}/api/auth/me`,
+        { withCredentials: true }
+      );
       return res.data.user;
     } catch (err) {
       return rejectWithValue(null);
     }
   }
 );
+
 const authSlice = createSlice({
   name: "auth",
   initialState: {
     user: null,
     isAuthenticated: false,
-    loading: false,
+    loading: true, // 🔥 IMPORTANT: start as true
     error: null,
   },
   reducers: {
     logout(state) {
       state.user = null;
       state.isAuthenticated = false;
+      state.loading = false;
     },
   },
   extraReducers: (builder) => {
@@ -91,7 +96,8 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      // Check auth (on refresh)
+
+      // 🔥 Check auth (refresh)
       .addCase(checkAuth.pending, (state) => {
         state.loading = true;
       })

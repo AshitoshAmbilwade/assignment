@@ -4,9 +4,9 @@ import { useSelector } from "react-redux";
 const ProtectedRoute = () => {
   const { isAuthenticated, loading } = useSelector((s) => s.auth);
 
-  // 🔥 WAIT until auth check finishes
+  // 🔥 DO NOTHING until auth is resolved
   if (loading) {
-    return null; // or spinner
+    return null; // or a loader if you want
   }
 
   if (!isAuthenticated) {
