@@ -5,6 +5,9 @@ export const createBid = (data) => {
 };
 
 export const getBidsByGig = (gigId) => {
+  if (!gigId) {
+    return Promise.reject(new Error("Gig ID is required"));
+  }
   return api.get(`/bids/${gigId}`);
 };
 

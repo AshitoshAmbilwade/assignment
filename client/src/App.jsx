@@ -1,35 +1,43 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { BrowserRouter } from "react-router-dom";
+
+import AppRoutes from "./routes/AppRoutes";
+import { checkAuth } from "./store/auth.slice";
+import socket from "./socket";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
+
+  // 1️⃣ Check auth on app load
+  useEffect(() => {
+    dispatch(checkAuth());
+  }, [dispatch]);
+
+  // 2️⃣ Join socket room when user is available
+  useEffect(() => {
+    if (user?.id) {
+      socket.emit("join", user.id);
+    }
+  }, [user]);
+
+  // 3️⃣ Listen for hire notification
+  useEffect(() => {
+    socket.on("hired", (data) => {
+      alert(data.message); // simple for demo
+    });
+
+    return () => {
+      socket.off("hired");
+    };
+  }, []);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
