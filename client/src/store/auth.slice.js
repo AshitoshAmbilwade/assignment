@@ -36,9 +36,10 @@ export const checkAuth = createAsyncThunk(
   "auth/checkAuth",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.get("/api/auth/me", {
-        withCredentials: true,
-      });
+      const res = await axios.get(
+  `${import.meta.env.VITE_API_URL}/api/auth/me`,
+  { withCredentials: true }
+);
       return res.data.user;
     } catch (err) {
       return rejectWithValue(null);
