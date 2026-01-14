@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { fetchGigs } from "../store/gig.slice";
 import { logout } from "../store/auth.slice";
 import { toast } from "sonner";
+import NotificationBell from "@/components/NotificationBell";
 
 // shadcn components
 import { Button } from "@/components/ui/button";
@@ -74,7 +75,7 @@ const Gigs = () => {
                     Post a Gig
                   </Button>
                 </Link>
-
+                <NotificationBell />
                 <Button size="sm" variant="outline" onClick={handleLogout}>
                   <LogOut className="h-4 w-4 mr-2" />
                   Logout

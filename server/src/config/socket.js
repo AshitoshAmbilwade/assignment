@@ -5,24 +5,29 @@ let io;
 export const initSocket = (httpServer) => {
   io = new Server(httpServer, {
     cors: {
-      origin: "http://localhost:5173",
+      origin: "*",
       credentials: true,
     },
   });
 
-  io.on("connection", (socket) => {
-    console.log("Socket connected:", socket.id);
+ io.on("connection", (socket) => {
+  console.log("🔌 CONNECTED socket.id =", socket.id);
 
-    // User joins their own room
-    socket.on("join", (userId) => {
-      socket.join(userId);
-      console.log(`User ${userId} joined socket room`);
-    });
+  socket.on("join", (userId) => {
+    console.log("📥 JOIN EVENT RECEIVED userId =", userId, "type =", typeof userId);
 
-    socket.on("disconnect", () => {
-      console.log("Socket disconnected:", socket.id);
-    });
+    socket.join(userId);
+
+    const rooms = [...socket.rooms];
+    console.log("🏠 SOCKET ROOMS =", rooms);
   });
+
+  socket.on("disconnect", (reason) => {
+    console.log("❌ DISCONNECTED socket.id =", socket.id, "reason =", reason);
+  });
+});
+
+
 
   return io;
 };

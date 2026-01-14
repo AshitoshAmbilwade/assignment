@@ -1,6 +1,8 @@
 import Bid from "../models/Bid.js";
 import Gig from "../models/Gig.js";
 import mongoose from "mongoose";
+import { getIO } from "../config/socket.js";
+
 // POST /api/bids
 export const createBid = async (req, res) => {
   try {
@@ -61,7 +63,6 @@ export const createBid = async (req, res) => {
   }
 };
 
-
 // GET /api/bids/:gigId
 export const getBidsForGig = async (req, res) => {
   try {
@@ -71,10 +72,7 @@ export const getBidsForGig = async (req, res) => {
       return res.status(400).json({ message: "Invalid gig id" });
     }
 
-    const gig = await Gig.findById(gigId).populate(
-      "ownerId",
-      "name email"
-    );
+    const gig = await Gig.findById(gigId).populate("ownerId", "name email");
 
     if (!gig) {
       return res.status(404).json({ message: "Gig not found" });
@@ -96,4 +94,56 @@ export const getBidsForGig = async (req, res) => {
   }
 };
 
+export const hireBid = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
+  try {
+    const { bidId } = req.params;
+
+    const bid = await Bid.findById(bidId).session(session);
+    if (!bid) throw new Error("Bid not found");
+
+    const gig = await Gig.findOne({
+      _id: bid.gigId,
+      ownerId: req.user._id,
+      status: "open",
+    }).session(session);
+
+    if (!gig) throw new Error("Not authorized or gig closed");
+
+    gig.status = "assigned";
+    await gig.save({ session });
+
+    bid.status = "hired";
+    await bid.save({ session });
+
+    await Bid.updateMany(
+      { gigId: gig._id, _id: { $ne: bid._id } },
+      { status: "rejected" },
+      { session }
+    );
+
+    await session.commitTransaction();
+    session.endSession();
+
+    // 🔔 REALTIME NOTIFICATION
+    const io = getIO();
+
+    console.log(
+      "📤 Sending hire notification to:",
+      bid.freelancerId.toString()
+    );
+    setTimeout(() => {
+    io.to(bid.freelancerId.toString()).emit("hire-notification", {
+      message: `You have been hired for ${gig.title}!`,
+      gigId: gig._id,
+    });}, 3000);
+
+    res.json({ message: "Freelancer hired successfully" });
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    res.status(400).json({ message: error.message });
+  }
+};
