@@ -3,12 +3,16 @@ import { Server } from "socket.io";
 let io;
 
 export const initSocket = (httpServer) => {
+  const allowedOrigins = [
+  "http://localhost:5173",
+  "https://gigflow-beige.vercel.app",
+];
   io = new Server(httpServer, {
-    cors: {
-      origin: "https://gigflow-beige.vercel.app",
-      credentials: true,
-    },
-  });
+  cors: {
+    origin: allowedOrigins,
+    credentials: true,
+  },
+});
 
  io.on("connection", (socket) => {
   console.log("🔌 CONNECTED socket.id =", socket.id);
